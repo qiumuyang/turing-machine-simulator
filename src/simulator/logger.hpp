@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "exception.hpp"
+#include "tape.hpp"
 
 // external class turing::TuringSimulator
 // declare here due to circular dependency

@@ -106,6 +106,7 @@ public:
     auto end() { return tapes_.end(); }
     auto cbegin() const { return tapes_.cbegin(); }
     auto cend() const { return tapes_.cend(); }
+    size_t size() const { return tapes_.size(); }
 
     void reset() {
         for (auto& tape : tapes_) {

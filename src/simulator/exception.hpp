@@ -1,5 +1,5 @@
-#ifndef __EMULATOR_EXCEPTION_HPP__
-#define __EMULATOR_EXCEPTION_HPP__
+#ifndef __SIMULATOR_EXCEPTION_HPP__
+#define __SIMULATOR_EXCEPTION_HPP__
 
 #include <cstring>
 #include <exception>
@@ -24,4 +24,4 @@ private:
     const char* verbose_;
 };
 
-#endif  // __EMULATOR_EXCEPTION_HPP__
+#endif  // __SIMULATOR_EXCEPTION_HPP__

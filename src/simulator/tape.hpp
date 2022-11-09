@@ -1,5 +1,5 @@
-#ifndef __EMULATOR_TAPE_HPP__
-#define __EMULATOR_TAPE_HPP__
+#ifndef __SIMULATOR_TAPE_HPP__
+#define __SIMULATOR_TAPE_HPP__
 
 #include <sstream>
 #include <tuple>
@@ -151,4 +151,4 @@ public:
 };
 }  // namespace tape
 
-#endif  // __EMULATOR_TAPE_HPP__
+#endif  // __SIMULATOR_TAPE_HPP__

@@ -1,5 +1,5 @@
-#ifndef __EMULATOR_TRANSITION_HPP__
-#define __EMULATOR_TRANSITION_HPP__
+#ifndef __SIMULATOR_TRANSITION_HPP__
+#define __SIMULATOR_TRANSITION_HPP__
 
 #include <map>
 #include <tuple>
@@ -43,4 +43,4 @@ public:
 };
 }  // namespace transition
 
-#endif  // __EMULATOR_TRANSITION_HPP__
+#endif  // __SIMULATOR_TRANSITION_HPP__

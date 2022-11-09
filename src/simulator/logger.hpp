@@ -1,5 +1,5 @@
-#ifndef __EMULATOR_LOGGER_HPP__
-#define __EMULATOR_LOGGER_HPP__
+#ifndef __SIMULATOR_LOGGER_HPP__
+#define __SIMULATOR_LOGGER_HPP__
 
 #include <functional>
 #include <iomanip>
@@ -250,4 +250,4 @@ public:
 };
 }  // namespace logger
 
-#endif  // __EMULATOR_LOGGER_HPP__
+#endif  // __SIMULATOR_LOGGER_HPP__

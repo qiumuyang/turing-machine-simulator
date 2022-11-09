@@ -59,13 +59,13 @@ protected:
 
 public:
     TuringSimulator(const std::set<S>& states,
-                   const std::set<T>& alphabet,
-                   const std::set<T>& tape_alphabet,
-                   const S& initial_state,
-                   const std::set<S>& final_states,
-                   const Transition<S, T>& transition,
-                   const T& blank,
-                   size_t tape_num)
+                    const std::set<T>& alphabet,
+                    const std::set<T>& tape_alphabet,
+                    const S& initial_state,
+                    const std::set<S>& final_states,
+                    const Transition<S, T>& transition,
+                    const T& blank,
+                    size_t tape_num)
         : states_(states),
           alphabet_(alphabet),
           tape_alphabet_(tape_alphabet),
@@ -119,7 +119,7 @@ public:
      * @param logger the logger to log the execution
      * @return false if the simulator has halted, true otherwise
      */
-    bool step(const SimulatorLogger<S, T>* logger = nullptr) {
+    bool step(SimulatorLogger<S, T>* logger = nullptr) {
         if (halted()) {
             throw TuringSimulatorException(
                 "illegal operation",
@@ -151,7 +151,7 @@ public:
         }
         // log
         if (logger != nullptr) {
-            logger->log(*this);
+            logger->log_step(*this);
         }
         return !halted_;
     }
@@ -165,7 +165,7 @@ public:
      * @note For multiple runs, reset() to reset running state before next run.
      */
     std::vector<T> run(const std::vector<T>& input,
-                       const SimulatorLogger<S, T>* logger = nullptr) {
+                       SimulatorLogger<S, T>* logger = nullptr) {
         set_input(input);
         while (step(logger)) {
             // do nothing

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "simulator/turing.hpp"
+#include "simulator/simulator.hpp"
 #include "utils.hpp"
 
 namespace test_simulator {
@@ -68,7 +68,7 @@ void test_simulator() {
     auto simulator = TuringSimulator<std::string, char>(
         states, alphabet, tape_alphabet, start_state, final_states, transition,
         blank, num_tapes);
-    auto logger = SimulatorLogger<std::string, char>(false, std::cout);
+    auto logger = SimulatorLogger<std::string, char>(true, std::cout);
 
     for (auto& input : {"10", "11", "100", "101", "110", "111", "fail"}) {
         try {

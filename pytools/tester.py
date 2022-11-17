@@ -1,4 +1,5 @@
 import subprocess
+import time
 
 
 class Testcase:
@@ -10,15 +11,21 @@ class Testcase:
         raise NotImplementedError
 
     def test_many(self, n: int) -> None:
+        tik = time.perf_counter()
         for _ in range(n):
             input_, expect = self.rand_testcase()
             self.test(input_, expect)
-        print(f'{n} tests passed')
+        tok = time.perf_counter()
+        print(f'{n} tests passed, {tok - tik:.3f} seconds elapsed')
 
     def test(self, input_: str, expect: str) -> None:
         proc = subprocess.Popen(
             [self.executable, self.tm_file, input_], stdout=subprocess.PIPE
         )
+        if isinstance(expect, bool):
+            expect = 'true' if expect else 'false'
+        elif not isinstance(expect, str):
+            expect = str(expect)
         output = proc.stdout.read().decode('ascii').strip()
         if output != expect:
             print('input: ', input_)

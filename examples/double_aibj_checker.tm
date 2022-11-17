@@ -1,9 +1,9 @@
+; This example program checks if the input string is in {a_i b_j a_i b_j | i, j > 0}
 ; Input:  a string of a's and b's
-; Output: true if the string is in {a_i b_j a_i b_j | i, j > 0} and false otherwise
 ; > abbabb
-; < true
+;   true
 ; > abb
-; < false
+;   false
 
 ; 2 tapes
 ;   1st: input tape

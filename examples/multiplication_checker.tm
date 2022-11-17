@@ -1,9 +1,9 @@
+; This example program checks if the input multiplication equation holds.
 ; Input:  an equation of the form 1m x 1n = 1mn (m, n > 0)
-; Output: true if the equation holds, false otherwise.
 ; > 11x11=1111
-; < true
+;   true
 ; > 11x111=11111
-; < false
+;   false
 
 ; 3 tapes:
 ;   1st: input tape     11x111=111111

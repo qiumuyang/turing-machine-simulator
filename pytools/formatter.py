@@ -50,9 +50,20 @@ class Token:
                     line = ""
                 elif line.startswith("#"):
                     eq_idx = line.find("=")
-                    yield cls(line_no, TokenType.SHARP_X, line[:eq_idx])
-                    line = line[eq_idx:]
-                    expect_eq = True
+                    symbol = line[:eq_idx].strip()[1:2]
+                    if symbol and symbol in 'QSGBFNq':
+                        yield cls(line_no, TokenType.SHARP_X, line[:eq_idx])
+                        line = line[eq_idx:]
+                        expect_eq = True
+                    else:
+                        # treat as normal content
+                        stop = re.search(r"[;,{}\s]", line)
+                        if stop:
+                            yield cls(line_no, TokenType.ITEM, line[: stop.start()])
+                            line = line[stop.start() :]
+                        else:
+                            yield cls(line_no, TokenType.ITEM, line)
+                            line = ""
                 elif line.startswith("=") and expect_eq:
                     yield cls(line_no, TokenType.EQ, line[:1])
                     line = line[1:]
@@ -71,7 +82,7 @@ class Token:
                     stop = re.search(r"[;#,{}\s]", line)
                     if stop:
                         yield cls(line_no, TokenType.ITEM, line[: stop.start()])
-                        line = line[stop.start():]
+                        line = line[stop.start() :]
                     else:
                         yield cls(line_no, TokenType.ITEM, line)
                         line = ""
@@ -99,8 +110,8 @@ def get_line_tokens(f: TextIO):
             j = i + 1
             while j < len(tokens):
                 if (
-                        tokens[j].token_type == TokenType.RC
-                        and tokens[j].line_no == tokens[i].line_no
+                    tokens[j].token_type == TokenType.RC
+                    and tokens[j].line_no == tokens[i].line_no
                 ):
                     one_line_starts.append(tokens[i])
                     i = j
@@ -140,7 +151,7 @@ def get_line_tokens(f: TextIO):
                 j += 1
             # move comments to the beginning of SHARP_X line
             for c in filter(
-                    lambda t: t.token_type == TokenType.COMMENT, tokens[i + 1: j]
+                lambda t: t.token_type == TokenType.COMMENT, tokens[i + 1 : j]
             ):
                 token_lines.append([c])
             # find the following LC or ITEM, maybe comments in between
@@ -150,7 +161,7 @@ def get_line_tokens(f: TextIO):
                     break
                 k += 1
             for c in filter(
-                    lambda t: t.token_type == TokenType.COMMENT, tokens[j + 1: k]
+                lambda t: t.token_type == TokenType.COMMENT, tokens[j + 1 : k]
             ):
                 token_lines.append([c])
             if tokens[k].token_type == TokenType.ITEM:
@@ -227,9 +238,9 @@ def format(f: TextIO):
         line = token_lines[i]
         # merge consecutive comments into one
         while (
-                len(line) >= 2
-                and line[-1].token_type == TokenType.COMMENT
-                and line[-2].token_type == TokenType.COMMENT
+            len(line) >= 2
+            and line[-1].token_type == TokenType.COMMENT
+            and line[-2].token_type == TokenType.COMMENT
         ):
             line[-2].value += line.pop().value
 
@@ -306,4 +317,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 3:
         open(sys.argv[2], "w").write(x)
     else:
-        print(x)
+        open(sys.argv[1], "w").write(x)

@@ -1,5 +1,5 @@
 ; This example program checks if the input string is in {a_i b_j a_i b_j | i, j > 0}
-; Input:  a string of a's and b's
+; Input: a string of a's and b's
 ; > abbabb
 ;   true
 ; > abb

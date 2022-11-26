@@ -161,7 +161,6 @@ public:
      * @brief Log instantaneous description of the turing machine
      */
     void log_step(const turing::TuringSimulator<S, T>& simulator) {
-        // TODO: implement
         if (!verbose_) {
             return;
         }

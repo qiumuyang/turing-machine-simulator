@@ -123,7 +123,6 @@ public:
         // check input symbol is in the alphabet
         for (const auto& symbol : input) {
             if (alphabet_.find(symbol) == alphabet_.end()) {
-                // TODO: verbose
                 throw TuringSimulatorException(
                     "illegal input", "input symbol is not in the alphabet");
             }

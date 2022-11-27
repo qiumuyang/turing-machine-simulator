@@ -24,4 +24,5 @@ class Test(Testcase):
         )
 
 
-Test.parse_args()
+if __name__ == '__main__':
+    Test.parse_args()

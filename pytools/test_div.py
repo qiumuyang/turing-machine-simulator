@@ -13,4 +13,5 @@ class Test(Testcase):
         return input_, expect
 
 
-Test.parse_args()
+if __name__ == '__main__':
+    Test.parse_args()

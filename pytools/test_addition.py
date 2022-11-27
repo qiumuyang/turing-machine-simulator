@@ -15,4 +15,5 @@ class Test(Testcase):
         return f'{x_bin}#{y_bin}', add_bin
 
 
-Test.parse_args()
+if __name__ == '__main__':
+    Test.parse_args()

@@ -12,4 +12,5 @@ class Test(Testcase):
         return ''.join(random.choice('ab') for _ in range(strlen)), bin(strlen)[2:]
 
 
-Test.parse_args()
+if __name__ == '__main__':
+    Test.parse_args()

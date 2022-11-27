@@ -154,7 +154,6 @@ public:
         // read tape
         auto input = tape_.read();
         // find transition
-        auto state_input = std::make_tuple(state_, input);
         if (!transition_.has_transition(state_, input)) {
             // no transition found
             halt(Halt::NO_TRANSISTION, logger);

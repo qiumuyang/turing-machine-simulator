@@ -9,7 +9,7 @@ else
 endif
 
 main:
-	g++ -Wall -Wextra -Werror -std=c++17 -o turing$(OUT) src/main.cpp -I src -O2
+	g++ -Wall -Wextra -Werror -std=c++17 -o turing$(OUT) src/main.cpp -I src -O2 -g
 
 grammar:
 	g++ -Wall -Wextra -Werror -std=c++17 -o turing$(OUT) src/main.cpp -I src -O2

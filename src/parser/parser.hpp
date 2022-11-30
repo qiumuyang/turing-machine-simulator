@@ -10,6 +10,7 @@
 #include "exception.hpp"
 #include "reader.hpp"
 #include "simulator/simulator.hpp"
+#include "simulator/transition.hpp"
 
 namespace strings {
 const std::string whitespace = " \t\n\r\v\f";
@@ -24,7 +25,7 @@ const std::string printable = digits + ascii_letters + punctuation + whitespace;
 const std::string acceptable_states = ascii_letters + digits + "_";
 const std::string acceptable_symbols =
     ascii_letters + digits +
-    "!\"#$%&'()+-./:<=>?@[\\]^_`|~";  // ,;*{} \t\n\r\v\f removed
+    "!\"#$%&'()+-./:<=>?@[\\]^_`|~*";  // ,;{} \t\n\r\v\f removed, * special
 const std::string acceptable_directions = "lr*";
 const std::string definition = "QFSBGN";
 
@@ -34,6 +35,7 @@ const char SHARP = '#';
 const char EQUAL = '=';
 const char LC = '{';
 const char RC = '}';
+const char WILD = '*';
 }  // namespace strings
 
 namespace parser {
@@ -61,7 +63,7 @@ protected:
     std::set<char> input_symbols_char;
     std::set<char> tape_symbols_char;
     std::set<std::string> final_states;
-    turing::Transition<std::string, char> transition;
+    transition::WildcardTransition<std::string, char> transition;
     std::string initial_state;
     std::string blank;
     std::string n_tapes;
@@ -334,10 +336,12 @@ protected:
         int i = 0;
         for (const char& symbol : symbols) {
             if (tape_symbols.find(std::string(1, symbol)) ==
-                tape_symbols.end()) {
+                    tape_symbols.end() &&
+                symbol != strings::WILD) {
                 throw ParserException(
                     "symbol '" + std::string(1, symbol) + "' not declared",
-                    reader_.take_line(), reader_.line(), reader_.column() - symbols.size() + i);
+                    reader_.take_line(), reader_.line(),
+                    reader_.column() - symbols.size() + i);
             }
             i++;
         }
@@ -426,15 +430,6 @@ protected:
         if (!n_tapes_parsed_) {
             throw ParserException("undefined number of tapes '#N'");
         }
-        // convert string symbols to char symbols
-        std::transform(
-            tape_symbols.begin(), tape_symbols.end(),
-            std::inserter(tape_symbols_char, tape_symbols_char.end()),
-            [](const std::string& s) { return s[0]; });
-        std::transform(
-            input_symbols.begin(), input_symbols.end(),
-            std::inserter(input_symbols_char, input_symbols_char.end()),
-            [](const std::string& s) { return s[0]; });
         // check states in #Q
         for (auto state : final_states) {
             if (states.find(state) == states.end()) {
@@ -453,10 +448,20 @@ protected:
                                       std::string(1, symbol) +
                                       "' not declared in '#G'");
             }
+            if (symbol == strings::WILD) {
+                throw ParserException("wildcard symbol '" +
+                                      std::string(1, symbol) +
+                                      "' not allowed in '#S'");
+            }
         }
         if (tape_symbols.find(blank) == tape_symbols.end()) {
             throw ParserException("blank symbol '" + blank +
                                   "' not declared in '#G'");
+        }
+        if (tape_symbols_char.find(strings::WILD) != tape_symbols_char.end()) {
+            throw ParserException("wildcard symbol '" +
+                                  std::string(1, strings::WILD) +
+                                  "' not allowed in '#G'");
         }
     }
 
@@ -474,7 +479,8 @@ public:
           final_states_parsed_(false),
           transition_parsed_(false),
           blank_parsed_(false),
-          n_tapes_parsed_(false) {
+          n_tapes_parsed_(false),
+          transition(strings::WILD) {
         if (!file_.is_open()) {
             throw std::runtime_error("No such file or directory");
         }
@@ -506,6 +512,19 @@ public:
                         break;
                 }
             }
+
+            // convert string symbols to char symbols
+            std::transform(
+                tape_symbols.begin(), tape_symbols.end(),
+                std::inserter(tape_symbols_char, tape_symbols_char.end()),
+                [](const std::string& s) { return s[0]; });
+            std::transform(
+                input_symbols.begin(), input_symbols.end(),
+                std::inserter(input_symbols_char, input_symbols_char.end()),
+                [](const std::string& s) { return s[0]; });
+            // expand wildcards
+            transition.initialize_transition(tape_symbols_char);
+            // check integrity
             check_integrity();
             return turing::TuringSimulator<std::string, char>(
                 states, input_symbols_char, tape_symbols_char, initial_state,

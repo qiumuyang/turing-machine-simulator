@@ -7,8 +7,8 @@
 #include <tuple>
 #include <vector>
 
-#include <iostream>
 #include "tape.hpp"
+
 namespace transition {
 
 template <typename S, typename T>
@@ -101,6 +101,8 @@ public:
         for (const auto& state_input : to_be_removed) {
             transition_.erase(state_input);
         }
+        std::set<std::vector<T>> input_combination =
+            all_combination(alphabet, input_length);
         // 2. check wildcard transition for each state
         for (auto& [state, wildcard_transition] : state_wildcard_transition) {
             // 2.1 sort wildcard transition by the number of wildcards
@@ -112,8 +114,7 @@ public:
                                  std::count(std::get<1>(b).begin(),
                                             std::get<1>(b).end(), wildcard_);
                       });
-            std::set<std::vector<T>> possible_input =
-                all_combination(alphabet, input_length);
+            auto possible_input = input_combination;
             // possible_input.erase(state_explicit_input[state].begin(),
             //                      state_explicit_input[state].end());
             // BUG: the behavior of set.erase is not as expected

@@ -24,7 +24,7 @@ using TransitionTuple =
 using tape::Move;
 
 template <typename T>
-std::set<std::vector<T>> all_permutation(const std::set<T>& input, size_t k);
+std::set<std::vector<T>> all_combination(const std::set<T>& input, size_t k);
 
 template <typename S, typename T>
 class Transition {
@@ -49,6 +49,8 @@ public:
         transition_[std::make_tuple(state, input)] =
             std::make_tuple(next_state, output, move);
     }
+    auto begin() const { return transition_.begin(); }
+    auto end() const { return transition_.end(); }
 };
 
 template <typename S, typename T>
@@ -80,9 +82,9 @@ public:
         size_t input_length = 0;
         // 1. put transitions into different categories
         std::vector<StateInput<S, T>> to_be_removed;
-        for (auto& [state_input, state_output_move] : transition_) {
-            auto [state, input] = state_input;
-            auto [next_state, output, move] = state_output_move;
+        for (const auto& [state_input, state_output_move] : transition_) {
+            const auto& [state, input] = state_input;
+            const auto& [next_state, output, move] = state_output_move;
             input_length = input.size();
             if (std::find(input.begin(), input.end(), wildcard_) !=
                 input.end()) {
@@ -96,7 +98,7 @@ public:
                 state_explicit_input[state].insert(input);
             }
         }
-        for (auto& state_input : to_be_removed) {
+        for (const auto& state_input : to_be_removed) {
             transition_.erase(state_input);
         }
         // 2. check wildcard transition for each state
@@ -111,11 +113,16 @@ public:
                                             std::get<1>(b).end(), wildcard_);
                       });
             std::set<std::vector<T>> possible_input =
-                all_permutation(alphabet, input_length);
-            possible_input.erase(state_explicit_input[state].begin(),
-                                 state_explicit_input[state].end());
+                all_combination(alphabet, input_length);
+            // possible_input.erase(state_explicit_input[state].begin(),
+            //                      state_explicit_input[state].end());
+            // BUG: the behavior of set.erase is not as expected
+            // (only accepts iterator from itself)
+            for (const auto& input : state_explicit_input[state]) {
+                possible_input.erase(input);
+            }
             // 2.2 expand wildcard, update transition_ & state_explicit_input
-            for (auto& [state, input, next_state, output, move] :
+            for (const auto& [state, input, next_state, output, move] :
                  wildcard_transition) {
                 std::set<std::vector<T>> expanded_input;
                 for (const auto& possible : possible_input) {
@@ -144,35 +151,38 @@ public:
                                 "symbols");
                         }
                     }
-                    if (match && state_explicit_input[state].find(new_input) ==
-                                     state_explicit_input[state].end()) {
+                    if (match) {
+                        state_explicit_input[state].insert(new_input);
                         add_transition(state, new_input, next_state, new_output,
                                        move);
-                        // state_explicit_input[state].insert(
-                        //     std::vector<T>(new_input.begin(), new_input.end()));
-                        expanded_input.insert(possible);
+                        expanded_input.insert(new_input);
                     }
                 }
-
-                // possible_input.erase(expanded_input.begin(),
-                //                      expanded_input.end());
-                // std::cout << "erase done" << std::endl;
+                for (const auto& input : expanded_input) {
+                    possible_input.erase(input);
+                }
             }
         }
-        std::cout << "initialize_transition done" << std::endl;
     }
 };
 
 template <typename T>
-std::set<std::vector<T>> all_permutation(const std::set<T>& input, size_t n) {
-    // sort at first and then use std::next_permutation
+std::set<std::vector<T>> all_combination(const std::set<T>& input, size_t n) {
+    // all possible combination of input with length n (allow repetition)
     std::set<std::vector<T>> result;
-    std::vector<T> input_sorted = std::vector<T>(input.begin(), input.end());
-    std::sort(input_sorted.begin(), input_sorted.end());
-    do {
-        result.insert(
-            std::vector<T>(input_sorted.begin(), input_sorted.begin() + n));
-    } while (std::next_permutation(input_sorted.begin(), input_sorted.end()));
+    if (n == 0) {
+        result.insert(std::vector<T>());
+        return result;
+    }
+    for (const auto& e : input) {
+        std::set<T> input_copy = input;
+        auto result_sub = all_combination(input_copy, n - 1);
+        for (auto& v : result_sub) {
+            auto nv = std::vector<T>(v);
+            nv.push_back(e);
+            result.insert(nv);
+        }
+    }
     return result;
 }
 }  // namespace transition

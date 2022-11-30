@@ -4,18 +4,19 @@ from pathlib import Path
 from tester import Testcase
 
 tests = [
-    ('test_addition', 'binary_addition.tm'),
-    ('test_aibj', 'double_aibj_checker.tm'),
-    ('test_circular_shift', 'right_circular_shift_expand.tm'),
-    ('test_div', 'binary_ceiling_div2.tm'),
-    ('test_multiplication', 'multiplication_checker.tm'),
-    ('test_parenthesis', 'parenthesis_checker_expand.tm'),
-    ('test_strlen', 'strlen_expand.tm'),
+    ('test_addition', 'binary_addition.tm', True),
+    ('test_aibj', 'double_aibj_checker.tm', True),
+    ('test_circular_shift', 'right_circular_shift_expand.tm', True),
+    ('test_div', 'binary_ceiling_div2.tm', True),
+    ('test_multiplication', 'multiplication_checker.tm', True),
+    ('test_parenthesis', 'parenthesis_checker_expand.tm', True),
+    ('test_strlen', 'strlen_expand.tm', True),
 ]
 tests_wildcard = [
-    ('test_circular_shift', 'right_circular_shift.tm'),
-    ('test_parenthesis', 'parenthesis_checker.tm'),
-    ('test_strlen', 'strlen.tm'),
+    ('test_circular_shift', 'right_circular_shift.tm', True),
+    ('test_parenthesis', 'parenthesis_checker.tm', True),
+    ('test_perfect_square', 'perfect_square_checker.tm', True),
+    ('test_strlen', 'strlen.tm', True),
 ]
 tm_dir = Path(__file__).parent.parent / 'examples'
 
@@ -51,10 +52,14 @@ def main():
         help='use testcases with wildcard transition',
     )
     args = parser.parse_args()
-    for py_testcase, tm_file in tests:
+    for py_testcase, tm_file, enabled in tests:
+        if not enabled:
+            continue
         test(args.exec, py_testcase, tm_file, args.n)
     if args.wildcard:
-        for py_testcase, tm_file in tests_wildcard:
+        for py_testcase, tm_file, enabled in tests_wildcard:
+            if not enabled:
+                continue
             test(args.exec, py_testcase, tm_file, args.n)
 
 

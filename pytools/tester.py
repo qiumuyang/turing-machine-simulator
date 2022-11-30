@@ -27,7 +27,7 @@ class Testcase:
                 pass
         n = passed
         print(
-            f'{n} tests passed, {elapsed:.3f} seconds elapsed, {mem / n:.3f} MB per test'
+            f'{n} tests passed, {elapsed:.3f} seconds elapsed, {mem / max(n, 1):.3f} MB per test'
         )
 
     def test(self, input_: str, expect: str) -> float:

@@ -381,7 +381,7 @@ protected:
         std::string direction_ = reader_.take();
         std::vector<turing::Move> direction;
         std::transform(direction_.begin(), direction_.end(),
-                       std::back_inserter(direction), [this](char c) {
+                       std::back_inserter(direction), [](char c) {
                            switch (c) {
                                case 'l':
                                    return turing::Move::BACKWARD;
@@ -485,7 +485,7 @@ public:
             throw std::runtime_error("No such file or directory");
         }
     } catch (std::runtime_error const& e) {
-        if (verbose_) {
+        if (verbose) {
             std::cerr << filename << ": " << e.what() << std::endl;
         } else {
             std::cerr << "cannot open file" << std::endl;

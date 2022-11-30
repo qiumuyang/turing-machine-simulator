@@ -1,7 +1,7 @@
 ifeq ($(OS),Windows_NT)
 	RM := del /Q *.o *.exe
 	OUT := .exe
-	TESTS := test_simulator
+	TESTS := test_transition
 else
 	RM := rm -f *.o test turing
 	OUT := 
@@ -9,7 +9,7 @@ else
 endif
 
 main:
-	g++ -Wall -Wextra -Werror -std=c++17 -o turing$(OUT) src/main.cpp -I src -O2 -g
+	g++ -Wall -Wextra -Werror -std=c++17 -o turing$(OUT) src/main.cpp -I src -O2
 
 grammar:
 	g++ -Wall -Wextra -Werror -std=c++17 -o turing$(OUT) src/main.cpp -I src -O2

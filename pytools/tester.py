@@ -13,12 +13,22 @@ class Testcase:
 
     def test_many(self, n: int) -> None:
         mem = 0
-        tik = time.perf_counter()
+        elapsed = 0
+        passed = 0
         for _ in range(n):
             input_, expect = self.rand_testcase()
-            mem += self.test(input_, expect)
-        tok = time.perf_counter()
-        print(f'{n} tests passed, {tok - tik:.3f} seconds elapsed, {mem / n:.3f} MB per test')
+            try:
+                tik = time.perf_counter()
+                mem += self.test(input_, expect)
+                tok = time.perf_counter()
+                passed += 1
+                elapsed += tok - tik
+            except AssertionError:
+                pass
+        n = passed
+        print(
+            f'{n} tests passed, {elapsed:.3f} seconds elapsed, {mem / n:.3f} MB per test'
+        )
 
     def test(self, input_: str, expect: str) -> float:
         proc = subprocess.Popen(
@@ -31,9 +41,10 @@ class Testcase:
             expect = str(expect)
         output = proc.stdout.read().decode('ascii').strip()
         if output != expect:
-            print('input: ', input_)
-            print('expect:', repr(expect))
+            print('[FAIL]')
+            print('input: ', repr(input_))
             print('output:', repr(output))
+            print('expect:', repr(expect))
             raise AssertionError('test failed')
         return mem
 

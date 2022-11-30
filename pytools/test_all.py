@@ -6,19 +6,27 @@ from tester import Testcase
 tests = [
     ('test_addition', 'binary_addition.tm'),
     ('test_aibj', 'double_aibj_checker.tm'),
+    ('test_circular_shift', 'right_circular_shift_expand.tm'),
     ('test_div', 'binary_ceiling_div2.tm'),
     ('test_multiplication', 'multiplication_checker.tm'),
     ('test_parenthesis', 'parenthesis_checker_expand.tm'),
     ('test_strlen', 'strlen_expand.tm'),
 ]
 tests_wildcard = [
+    ('test_circular_shift', 'right_circular_shift.tm'),
     ('test_parenthesis', 'parenthesis_checker.tm'),
     ('test_strlen', 'strlen.tm'),
 ]
 tm_dir = Path(__file__).parent.parent / 'examples'
 
 
+test_cnt = 0
+
+
 def test(executable: str, py_testcase: str, tm_file: str, n: int) -> None:
+    global test_cnt
+    test_cnt += 1
+
     module = import_module(py_testcase)
     for _, cls in module.__dict__.items():
         if isinstance(cls, type) and issubclass(cls, Testcase) and cls is not Testcase:
@@ -26,7 +34,7 @@ def test(executable: str, py_testcase: str, tm_file: str, n: int) -> None:
     else:
         print(f'no Testcase found in {py_testcase}')
         return
-    print(py_testcase, tm_file)
+    print(f'[{test_cnt}]', py_testcase, tm_file)
     cls(executable, str(tm_dir / tm_file)).test_many(n)
 
 

@@ -26,15 +26,15 @@ read   a_ a_ rl add
 read   b_ b_ rl add   
 read   __ __ ll write 
 
-add *0 *1 *r return
-add *_ *1 *r return
-add *1 *0 *l add
+add    *0 *1 *r return
+add    *_ *1 *r return
+add    *1 *0 *l add   
 
 ; State return : move the head to the right for next addition
-return *_ *_ ** read
+return *_ *_ ** read  
 return ** ** *r return
 
 write  __ __ ** halt  
-write *0 00 ll write
-write *1 11 ll write
-write *_ __ l* write
+write  *0 00 ll write 
+write  *1 11 ll write 
+write  *_ __ l* write 

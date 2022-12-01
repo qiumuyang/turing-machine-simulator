@@ -54,7 +54,7 @@ class Testcase:
 
         def f():
             max_mem = 0
-            while psutil.pid_exists(pid):
+            while psutil.pid_exists(pid) and psutil.Process(pid).status() != 'zombie':
                 try:
                     mem = psutil.Process(pid).memory_info().rss
                 except psutil.NoSuchProcess:

@@ -67,26 +67,29 @@ def get_alphabet(input_: str) -> str:
     return ''.join(symbols)
 
 
-def get_transitions(input_: str) -> str:
+def get_n_tapes(input_: str) -> int:
+    # pattern: #N = \d+
+    pattern = re.compile(r'#N\s*=\s*(\d+)', re.DOTALL)
+    return int(pattern.search(input_).group(1))
+
+
+def get_transitions(input_: str, n: int) -> str:
     # pattern: state \ws input \ws output \ws direction \ws next_state
     #          do not match comma or semicolon
     state = r'[a-zA-Z0-9_]+'
     direction = r'[lr\*]+'
-    # find lines that start with state and end with state
+    # find lines <state> <input: n> <output: n> <direction: n> <next_state>
     pattern = re.compile(
-        r'{state} +?[^,;\n]+?{direction} +?{state}'.format(
-            state=state, direction=direction
-        )
+        r'({state})\s+({input})\s+({output})\s+({direction})\s+({state})'.format(
+            state=state,
+            input=r'[^,;]' + '{{{}}}'.format(n),
+            output=r'[^,;]' + '{{{}}}'.format(n),
+            direction=direction,
+        ),
+        re.DOTALL,
     )
     match = pattern.findall(input_)
-    print(
-        '\n'.join(
-            map(repr, filter(lambda x: len(re.split(r'\s+', x.strip())) != 5, match))
-        )
-    )
-    return '\n'.join(
-        filter(lambda x: len(re.split(r'\s+', x.strip())) == 5, match)
-    )  # only keep valid transitions
+    return '\n'.join(' '.join(x) for x in match if len(x) == 5)
 
 
 def make_line(transition: list, is_star: bool = False) -> str:
@@ -111,7 +114,8 @@ def main():
     with open(args.input, 'r') as f:
         input_ = f.read()
     alphabet = get_alphabet(input_)
-    transitions = get_transitions(input_)
+    n = get_n_tapes(input_)
+    transitions = get_transitions(input_, n)
     expand, final = convert(transitions, alphabet)
     if args.output:
         f = open(args.output, 'w')

@@ -523,7 +523,11 @@ public:
                 std::inserter(input_symbols_char, input_symbols_char.end()),
                 [](const std::string& s) { return s[0]; });
             // expand wildcards
-            transition.initialize_transition(tape_symbols_char);
+            try {
+                transition.initialize_transition(tape_symbols_char);
+            } catch (std::runtime_error const& e) {
+                throw ParserException(e.what());
+            }
             // check integrity
             check_integrity();
             return turing::TuringSimulator<std::string, char>(

@@ -1,3 +1,4 @@
+import platform
 import subprocess
 import time
 import psutil
@@ -52,14 +53,20 @@ class Testcase:
     def get_memory_usage(pid: int) -> float:
         import concurrent.futures
 
+        query_zombie = lambda: psutil.Process(pid).status() == psutil.STATUS_ZOMBIE
+        if platform.system() == 'Windows':
+            query_zombie = lambda: False
+
         def f():
             max_mem = 0
-            while psutil.pid_exists(pid) and psutil.Process(pid).status() != 'zombie':
-                try:
+            try:
+                while True:
                     mem = psutil.Process(pid).memory_info().rss
-                except psutil.NoSuchProcess:
-                    break
-                max_mem = max(max_mem, mem)
+                    max_mem = max(max_mem, mem)
+                    if query_zombie():
+                        break
+            except psutil.NoSuchProcess:
+                pass
             return max_mem  # in bytes
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:

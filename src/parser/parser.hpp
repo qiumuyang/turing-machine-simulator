@@ -331,7 +331,8 @@ protected:
                 "unmatched number of symbols with number of tapes, expected " +
                     std::to_string(n_tapes_int) + ", got " +
                     std::to_string(symbols.size()),
-                reader_.take_line(), reader_.line(), reader_.column());
+                reader_.take_line(), reader_.line(),
+                reader_.column() - symbols.size() + n_tapes_int);
         }
         int i = 0;
         for (const char& symbol : symbols) {
@@ -399,7 +400,8 @@ protected:
                 "expected " +
                     std::to_string(n_tapes_int) + ", got " +
                     std::to_string(direction.size()),
-                reader_.take_line(), reader_.line(), reader_.column());
+                reader_.take_line(), reader_.line(),
+                reader_.column() - direction_.size() + n_tapes_int);
         }
         remove_ws_and_comments();
         check_unexpected_eof();

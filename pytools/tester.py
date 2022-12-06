@@ -4,6 +4,18 @@ import time
 import psutil
 
 
+def passed(s: str, *args, **kwargs):
+    print(f'\033[32m{s}\033[0m', *args, **kwargs)
+
+
+def failed(s: str, *args, **kwargs):
+    print(f'\033[31m{s}\033[0m', *args, **kwargs)
+
+
+def partial(s: str, *args, **kwargs):
+    print(f'\033[33m{s}\033[0m', *args, **kwargs)
+
+
 class Testcase:
     def __init__(self, executable: str, tm_file: str):
         self.executable = executable
@@ -15,19 +27,25 @@ class Testcase:
     def test_many(self, n: int) -> None:
         mem = 0
         elapsed = 0
-        passed = 0
+        n_passed = 0
         for _ in range(n):
             input_, expect = self.rand_testcase()
             try:
                 tik = time.perf_counter()
                 mem += self.test(input_, expect)
                 tok = time.perf_counter()
-                passed += 1
+                n_passed += 1
                 elapsed += tok - tik
             except AssertionError:
                 pass
-        n = passed
-        print(
+        if n_passed == 0:
+            logger = failed
+        elif n_passed == n:
+            logger = passed
+        else:
+            logger = partial
+        n = n_passed
+        logger(
             f'{n} tests passed, {elapsed:.3f} seconds elapsed, {mem / max(n, 1):.3f} MB per test'
         )
 
@@ -42,7 +60,7 @@ class Testcase:
             expect = str(expect)
         output = proc.stdout.read().decode('ascii').strip()
         if output != expect:
-            print('[FAIL]')
+            failed('[FAIL]')
             print('input: ', repr(input_))
             print('output:', repr(output))
             print('expect:', repr(expect))

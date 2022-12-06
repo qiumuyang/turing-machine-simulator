@@ -32,9 +32,7 @@ auto log_illegal_input =
                              const TuringSimulatorException& exception,
                              std::ostream& os) {
         (void)exception;  // unused
-        // trick: when input is illegal, tape is not modified
-        // so get_output() will return the first tape which is the input
-        std::vector<T> input = simulator.get_output();
+        const std::vector<T> input = simulator.raw_input();
         auto alphabet = simulator.input_alphabet();
 
         for (auto [i, symbol] = std::tuple{0, input.begin()};

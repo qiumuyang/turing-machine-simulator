@@ -53,9 +53,10 @@ protected:
     T blank_;                      // blank symbol
 
     // execution
-    S state_;    // current state
-    int step_;   // current step
-    Halt halt_;  // halt status
+    S state_;                   // current state
+    int step_;                  // current step
+    Halt halt_;                 // halt status
+    std::vector<T> raw_input_;  // raw input
 
     // definition & execution
     MultiTape<T> tape_;  // tape
@@ -99,6 +100,7 @@ public:
     const std::set<T>& input_alphabet() const { return alphabet_; }
     const std::set<T>& tape_alphabet() const { return tape_alphabet_; }
 
+    const std::vector<T>& raw_input() const { return raw_input_; }
     bool started() const { return step_ > 0; }
     bool halted() const { return halt_ != Halt::RUN; }
     void reset() {
@@ -119,6 +121,7 @@ public:
             logger->log_input(input);
         }
         tape_.set_tape(0, input);
+        raw_input_ = input;
 
         // check input symbol is in the alphabet
         for (const auto& symbol : input) {

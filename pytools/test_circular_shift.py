@@ -2,7 +2,7 @@ from tester import Testcase
 
 
 class Test(Testcase):
-    UpperBound = 100
+    UpperBound = 16384
 
     def rand_testcase(self) -> tuple:
         import random

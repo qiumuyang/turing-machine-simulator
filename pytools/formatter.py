@@ -284,9 +284,12 @@ def format(f: TextIO):
         )
 
     # align comments
-    max_width = (
-        max(len(s) for s, _ in def_line_temp.values() if _) if def_line_temp else 0
-    )
+    if all(not comment for content, comment in def_line_temp.values()):
+        max_width = 0  # no comments, no need to align
+    else:
+        max_width = (
+            max(len(s) for s, _ in def_line_temp.values() if _) if def_line_temp else 0
+        )
     lines = [""] * len(token_lines)
     for i, _ in enumerate(lines):
         if i not in def_line_temp:

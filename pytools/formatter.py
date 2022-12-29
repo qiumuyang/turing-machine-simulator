@@ -60,7 +60,7 @@ class Token:
                         stop = re.search(r"[;,{}\s]", line)
                         if stop:
                             yield cls(line_no, TokenType.ITEM, line[: stop.start()])
-                            line = line[stop.start() :]
+                            line = line[stop.start():]
                         else:
                             yield cls(line_no, TokenType.ITEM, line)
                             line = ""
@@ -82,7 +82,7 @@ class Token:
                     stop = re.search(r"[;#,{}\s]", line)
                     if stop:
                         yield cls(line_no, TokenType.ITEM, line[: stop.start()])
-                        line = line[stop.start() :]
+                        line = line[stop.start():]
                     else:
                         yield cls(line_no, TokenType.ITEM, line)
                         line = ""
@@ -151,7 +151,7 @@ def get_line_tokens(f: TextIO):
                 j += 1
             # move comments to the beginning of SHARP_X line
             for c in filter(
-                lambda t: t.token_type == TokenType.COMMENT, tokens[i + 1 : j]
+                lambda t: t.token_type == TokenType.COMMENT, tokens[i + 1: j]
             ):
                 token_lines.append([c])
             # find the following LC or ITEM, maybe comments in between
@@ -161,7 +161,7 @@ def get_line_tokens(f: TextIO):
                     break
                 k += 1
             for c in filter(
-                lambda t: t.token_type == TokenType.COMMENT, tokens[j + 1 : k]
+                lambda t: t.token_type == TokenType.COMMENT, tokens[j + 1: k]
             ):
                 token_lines.append([c])
             if tokens[k].token_type == TokenType.ITEM:
@@ -231,7 +231,7 @@ def get_line_tokens(f: TextIO):
     return token_lines
 
 
-def format(f: TextIO):
+def format(f: TextIO, strict: bool = True):
     token_lines = get_line_tokens(f)
 
     for i in reversed(range(len(token_lines))):
@@ -243,6 +243,11 @@ def format(f: TextIO):
             and line[-2].token_type == TokenType.COMMENT
         ):
             line[-2].value += line.pop().value
+
+    space_after_token = [TokenType.SHARP_X, TokenType.EQ]
+    if not strict:
+        space_after_token.append(TokenType.COMMA)
+    comment_sp = " " * 2
 
     def_line_temp = {}  # (content, comment)
     trans_line_temp = {}  # (1,2,3,4,5,comment)
@@ -264,7 +269,7 @@ def format(f: TextIO):
                 line_buf = ""
             else:
                 line_buf += token.value
-            if token.token_type in (TokenType.COMMA, TokenType.SHARP_X, TokenType.EQ):
+            if token.token_type in space_after_token:
                 line_buf += " "
         if line_buf:
             if line_buf.rstrip():
@@ -272,31 +277,36 @@ def format(f: TextIO):
             else:
                 def_line_temp[line_no] = ("", "")
 
+    # align transition lines
     widths = [0] * 5
     for a, b, c, d, e, comment in trans_line_temp.values():
         x = [a, b, c, d, e]
         widths = [max(w, len(s)) for w, s in zip(widths, x)]
-    for line_no in trans_line_temp:
-        a, b, c, d, e, comment = trans_line_temp[line_no]
+    for line_no, (a, b, c, d, e, comment) in trans_line_temp.items():
+        widths_ = widths.copy()
+        if not comment:
+            widths_[-1] = 0  # no comment, avoid extra space after last item
+        if strict:
+            widths_ = [0] * 5  # strict mode, no transition inner alignment
         def_line_temp[line_no] = (
-            " ".join(s.ljust(w) for s, w in zip([a, b, c, d, e], widths)),
+            " ".join(s.ljust(w) for s, w in zip([a, b, c, d, e], widths_)),
             comment,
         )
 
     # align comments
-    if all(not comment for content, comment in def_line_temp.values()):
+    if all(not comment for _, comment in def_line_temp.values()):
         max_width = 0  # no comments, no need to align
     else:
-        max_width = (
-            max(len(s) for s, _ in def_line_temp.values() if _) if def_line_temp else 0
-        )
+        max_width = max(len(content) 
+                        for content, comment in def_line_temp.values() 
+                        if comment)
     lines = [""] * len(token_lines)
     for i, _ in enumerate(lines):
         if i not in def_line_temp:
             continue
         line, comment = def_line_temp[i]
         if comment and line:
-            lines[i] = line.ljust(max_width) + " " + comment
+            lines[i] = line.ljust(max_width) + comment_sp + comment
         elif comment or line:
             lines[i] = line or comment
 
@@ -310,14 +320,39 @@ def format(f: TextIO):
     return "\n".join(lines).replace("\n\n\n", "\n\n")
 
 
-if __name__ == "__main__":
-    import sys
+def main():
+    import argparse
+    from pathlib import Path
 
-    if len(sys.argv) < 2:
-        print("Usage: formatter.py <file> [output]")
-        sys.exit(1)
-    x = format(open(sys.argv[1]))
-    if len(sys.argv) == 3:
-        open(sys.argv[2], "w").write(x)
+    # 2 modes:
+    # a. format a file, if output given, write to output, otherwise overwrite input
+    # b. format files in a directory, if output given, write to output, otherwise overwrite input
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="input file or directory", type=Path)
+    parser.add_argument("-o", "--output", help="output file or directory", type=Path, default=None)
+    parser.add_argument("-s", "--strict", help="strict mode", action="store_true")
+    args = parser.parse_args()
+
+    if args.input.is_dir():
+        if args.output is not None and args.output.exists() and not args.output.is_dir():
+            print("Output must be a directory if input is a directory")
+            exit(1)
+        if args.output is not None and not args.output.exists():
+            args.output.mkdir(exist_ok=True, parents=True)
+        for f in args.input.glob("*.tm"):
+            formatted = format(f.open(), args.strict)
+            if args.output is not None:
+                args.output.joinpath(f.name).write_text(formatted)
+            else:
+                f.write_text(formatted)
     else:
-        open(sys.argv[1], "w").write(x)
+        formatted = format(args.input.open(), args.strict)
+        if args.output is not None:
+            args.output.write_text(formatted)
+        else:
+            args.input.write_text(formatted)
+
+
+if __name__ == "__main__":
+    main()

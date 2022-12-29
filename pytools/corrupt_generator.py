@@ -209,6 +209,8 @@ def main(executable: str, temp_dir: str):
         transitions=['q0 0 1 r q1', 'q1 1 1 r q2', 'q2 0 0 r q2', 'q2 1 1 r q2'],
         tapes=1,
     )
+    if temp_dir and not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
     for corrupt_type in CorruptGenerator.all_corruptions():
         corrupt = CorruptGenerator(corrupt_type)
         if temp_dir:
@@ -228,8 +230,11 @@ def main(executable: str, temp_dir: str):
 
 
 if __name__ == '__main__':
-    import sys
+    import argparse
 
-    temp = sys.argv[2] if len(sys.argv) > 2 else ''
+    parser = argparse.ArgumentParser()
+    parser.add_argument('executable', help='path to the executable')
+    parser.add_argument('-t', '--temp', help='path to the temporary directory', default='')
+    args = parser.parse_args()
 
-    main(sys.argv[1], temp)
+    main(args.executable, args.temp)
